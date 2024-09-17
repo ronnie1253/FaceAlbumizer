@@ -1,19 +1,7 @@
 import os
 import cv2
-
-from shutil import copyfile
 import time
-
-# Path to the directory where the captured photo will be saved
-photo_directory = 'place the directory of the collection of photos'
-output_directory = 'place the directory of the photos where the photos matching the face will be stored'
-
-# Ensure photo and output directories exist
-if not os.path.exists(photo_directory):
-    os.makedirs(photo_directory)
-
-if not os.path.exists(output_directory):
-    os.makedirs(output_directory)
+from shutil import copyfile
 
 # Load OpenCV's pre-trained Haar Cascade face detector
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -43,7 +31,7 @@ def detect_faces(image_path):
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
     return faces
 
-def save_detected_face(image_path, faces):
+def save_detected_face(image_path, faces, output_directory):
     """Save cropped faces to the output directory."""
     image = cv2.imread(image_path)
     base_name = os.path.basename(image_path)
@@ -57,22 +45,33 @@ def save_detected_face(image_path, faces):
         output_path = os.path.join(output_folder, f"{file_name}_face{i+1}{ext}")
         cv2.imwrite(output_path, face_img)
 
-def process_photos(photo_directory):
+def process_photos(photo_directory, output_directory):
     """Process all photos in the directory to detect and save faces."""
     for file_name in os.listdir(photo_directory):
         file_path = os.path.join(photo_directory, file_name)
         if os.path.isfile(file_path):
             faces = detect_faces(file_path)
             if len(faces) > 0:
-                save_detected_face(file_path, faces)
+                save_detected_face(file_path, faces, output_directory)
             else:
                 print(f"No faces detected in {file_name}")
 
 if __name__ == "__main__":
+    # Get directory inputs from the user
+    photo_directory = input("Enter the directory where the photos are stored: ")
+    output_directory = input("Enter the directory where the cropped faces should be saved: ")
+
+    # Ensure photo and output directories exist
+    if not os.path.exists(photo_directory):
+        os.makedirs(photo_directory)
+    
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
     # Capture photo from webcam
     capture_photo(photo_directory)
     
     # Process the captured photo
-    process_photos(photo_directory)
+    process_photos(photo_directory, output_directory)
     
     print("Face detection and sorting complete.")
