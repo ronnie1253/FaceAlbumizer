@@ -27,8 +27,16 @@ def capture_photo(photo_directory):
 def detect_faces(image_path):
     """Detect faces in an image and return the face regions."""
     image = cv2.imread(image_path)
+    
+    # Convert to grayscale for histogram equalization
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    
+    # Apply histogram equalization to improve contrast (especially useful for low-light conditions)
+    equalized_gray = cv2.equalizeHist(gray)
+    
+    # Detect faces in the equalized image
+    faces = face_cascade.detectMultiScale(equalized_gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    
     return faces
 
 def save_detected_face(image_path, faces, output_directory):
@@ -57,6 +65,7 @@ def process_photos(photo_directory, output_directory):
                 print(f"No faces detected in {file_name}")
 
 if __name__ == "__main__":
+
     # Get directory inputs from the user
     photo_directory = input("Enter the directory where the photos are stored: ")
     output_directory = input("Enter the directory where the cropped faces should be saved: ")
